@@ -182,7 +182,7 @@ function Pagerank(vid)
     value2set = 0.15 / NumVertices() + 0.85 * sum
     setvalue(vid,value2set)
   end
-  if(superstep < 30)
+  if(superstep < 10)
     sendmsgtoallneighbors(vid,Getvalue(vid) / size(Getneighbors(vid),1))
   else
     VoteToHalt()
