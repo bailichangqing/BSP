@@ -167,6 +167,11 @@ MPI.Finalize()
 
 
 #garbage
+
+
+
+
+
 function Pagerank(vid)
   if(superstep >= 1)
     sum = 0.0
@@ -178,8 +183,22 @@ function Pagerank(vid)
     setvalue(vid,value2set)
   end
   if(superstep < 30)
-    sendmsgtoallneighbors(vid,Getvalue() / size(Getneighbors(vid),1))
+    sendmsgtoallneighbors(vid,Getvalue(vid) / size(Getneighbors(vid),1))
   else
     VoteToHalt()
   end
+end
+
+function ShortestPath(vid)
+  int mindist = IsSource(vid)? 0 : Inf
+  while(msgdone(vid) != true)
+    msg = nextmsg(vid)
+    mindist = msg.value < mindist? msg.value:mindist
+  end
+  if mindist < Getvalue(vid)
+    for each in Getneighbors(vid)
+      sendmsg(each.vid,mindist + each.weight)
+    end
+  end
+  VoteToHalt()
 end
