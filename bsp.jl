@@ -202,3 +202,18 @@ function ShortestPath(vid)
   end
   VoteToHalt()
 end
+
+function WCC(vid)
+  int rootid = Getvalue(vid)
+  while(msgdone(vid) != true)
+    newrootid = nextmsg(vid)
+    if newrootid < rootid
+      rootid = newrootid
+    end
+  end
+  if rootid < Getvalue(vid)
+    setvalue(vid,rootid)
+    sendmsgtoallneighbors(vid,rootid)
+  end
+  VoteToHalt()
+end
