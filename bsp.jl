@@ -118,7 +118,6 @@ rank = MPI.Comm_rank(MPI.COMM_WORLD)
 workern = MPI.Comm_size(MPI.COMM_WORLD)
 if rank == 0
   data = preparegraphdata("/Users/conghao/Documents/CS550/finalprj/testinput.txt")
-  println(data)
   #transfer data to other workers
   vertexlist = copy(data[1])    #prepare local data
   for i = 2:workern                #transfer data to others
@@ -155,3 +154,32 @@ elseif rank > 0
   println(vertexlist)
 end
 MPI.Finalize()
+
+
+
+
+
+
+
+
+
+
+
+
+#garbage
+function Pagerank(vid)
+  if(superstep >= 1)
+    sum = 0.0
+    while(msgdone(vid) != true)
+      msg = nextmsg(vid)
+      sum += msg.value
+    end
+    value2set = 0.15 / NumVertices() + 0.85 * sum
+    setvalue(vid,value2set)
+  end
+  if(superstep < 30)
+    sendmsgtoallneighbors(vid,Getvalue() / size(Getneighbors(vid),1))
+  else
+    VoteToHalt()
+  end
+end
