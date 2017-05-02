@@ -36,6 +36,57 @@ vertexlist = 0                  #to be initialize later
 msgqueues = 0                   #dictionary of msg queue for each local vertex. To be initialize later
 
 
+
+
+function Pagerank(vid)
+  if(superstep >= 1)
+    sum = 0.0
+    while(msgdone(vid) != true)
+      msg = nextmsg(vid)
+      sum += msg.value
+    end
+    value2set = 0.15 / NumVertices() + 0.85 * sum
+    setvalue(vid,value2set)
+  end
+  if(superstep < 10)
+    sendmsgtoallneighbors(vid,Getvalue(vid) / size(Getneighbors(vid),1))
+  else
+    VoteToHalt()
+  end
+end
+
+function ShortestPath(vid)
+  int mindist = IsSource(vid)? 0 : Inf
+  while(msgdone(vid) != true)
+    msg = nextmsg(vid)
+    mindist = msg.value < mindist? msg.value:mindist
+  end
+  if mindist < Getvalue(vid)
+    for each in Getneighbors(vid)
+      sendmsg(each.vid,mindist + each.weight)
+    end
+  end
+  VoteToHalt()
+end
+
+function WCC(vid)
+  int rootid = Getvalue(vid)
+  while(msgdone(vid) != true)
+    newrootid = nextmsg(vid)
+    if newrootid < rootid
+      rootid = newrootid
+    end
+  end
+  if rootid < Getvalue(vid)
+    setvalue(vid,rootid)
+    sendmsgtoallneighbors(vid,rootid)
+  end
+  VoteToHalt()
+end
+
+
+
+
 # This function put msgs into corresponding queue to be deliver later
 function sendmsg(src,neighbor::Neighbor,value)
   if neighbor.gid == rank   #target vertex is on local node
@@ -154,66 +205,3 @@ elseif rank > 0
   println(vertexlist)
 end
 MPI.Finalize()
-
-
-
-
-
-
-
-
-
-
-
-
-#garbage
-
-
-
-
-
-function Pagerank(vid)
-  if(superstep >= 1)
-    sum = 0.0
-    while(msgdone(vid) != true)
-      msg = nextmsg(vid)
-      sum += msg.value
-    end
-    value2set = 0.15 / NumVertices() + 0.85 * sum
-    setvalue(vid,value2set)
-  end
-  if(superstep < 10)
-    sendmsgtoallneighbors(vid,Getvalue(vid) / size(Getneighbors(vid),1))
-  else
-    VoteToHalt()
-  end
-end
-
-function ShortestPath(vid)
-  int mindist = IsSource(vid)? 0 : Inf
-  while(msgdone(vid) != true)
-    msg = nextmsg(vid)
-    mindist = msg.value < mindist? msg.value:mindist
-  end
-  if mindist < Getvalue(vid)
-    for each in Getneighbors(vid)
-      sendmsg(each.vid,mindist + each.weight)
-    end
-  end
-  VoteToHalt()
-end
-
-function WCC(vid)
-  int rootid = Getvalue(vid)
-  while(msgdone(vid) != true)
-    newrootid = nextmsg(vid)
-    if newrootid < rootid
-      rootid = newrootid
-    end
-  end
-  if rootid < Getvalue(vid)
-    setvalue(vid,rootid)
-    sendmsgtoallneighbors(vid,rootid)
-  end
-  VoteToHalt()
-end
